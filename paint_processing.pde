@@ -102,13 +102,11 @@ void getBox(int boxIndex) {
             break;
         case 3: // Freehand
             currentTool = freehand;
-            freehand.startDrawing(mouseX, mouseY);
             lineFirstClick = true;
             trianglePointsSet = 0;
             break;
         case 4: // Eraser
             currentTool = eraser;
-            eraser.startDrawing(mouseX, mouseY);
             lineFirstClick = true;
             trianglePointsSet = 0;
             break;
@@ -152,10 +150,16 @@ void useTool() {
             }
             break;
         case "Freehand":
-            freehand.addPoint(mouseX, mouseY);
+            Freehand fh = (Freehand) currentTool;
+            if (!fh.isDrawing) {
+                fh.startDrawing(mouseX, mouseY);
+            }
             break;
         case "Eraser":
-            eraser.addPoint(mouseX, mouseY);
+            Eraser es = (Eraser) currentTool;
+            if (!es.isDrawing) {
+                es.startDrawing(mouseX, mouseY);
+            }
             break;
     }
 }
@@ -164,10 +168,10 @@ void mouseDragged() {
     if (mouseY >= BOX_HEIGHT) {
         switch (currentTool.getType()) {
             case "Freehand":
-                freehand.addPoint(mouseX, mouseY);
+                ((Freehand) currentTool).addPoint(mouseX, mouseY);
                 break;
             case "Eraser":
-                eraser.addPoint(mouseX, mouseY);
+                ((Eraser) currentTool).addPoint(mouseX, mouseY);
                 break;
         }
     }
