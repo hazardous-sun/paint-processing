@@ -8,7 +8,7 @@ boolean[] boxHover = new boolean[NUM_BOXES];
 // Shapes to be drawn
 Shape[] shapes = {
     new Square(0, 0, 5, false, color(255), color(0)),
-    new Triangle(0, 0, 0, 0, 0, 0, false, color(255), color(0))
+    new Triangle(0, 0, 0, 0, 0, 0, false, color(255), color(0)),
     new Line(0, 0, 0, 0, color(0))
 };
 
@@ -61,6 +61,25 @@ void mousePressed() {
                 case 5: // Configure
                     break;
                 
+            }
+        } else {
+            switch (currentTool.getType()) {
+                case "Square":
+                    // Set position of the square to mouse position and draw it
+                    break;
+                case "Triangle":
+                    // Set position of the triangle to mouse position and draw it
+                    break;
+                case "Line":
+                    // Set position of the line to mouse position and draw it
+                    // It should require 2 clicks to set start and end points
+                    break;
+                case "Freehand":
+                    // Draw freehand lines
+                    break;
+                case "Eraser":
+                    // Similar to freehand but with the same color as the background
+                    break;
             }
         }
     }
