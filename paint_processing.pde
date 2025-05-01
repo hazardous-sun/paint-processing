@@ -12,12 +12,28 @@ Shape[] shapes = {
     new Line(0, 0, 0, 0, color(0))
 };
 
-// Curretly selected tool
-Shape currentTool = shapes[0];
+Freehand freehand = new Freehand(color(0));
+Eraser eraser = new Eraser();
+
+// Currently selected tool
+Tool currentTool = shapes[0];
+
+// For line drawing
+boolean lineFirstClick = true;
+int lineStartX, lineStartY;
+
+// For triangle drawing
+int trianglePointsSet = 0;
+int[] triangleX = new int[3];
+int[] triangleY = new int[3];
+
+// List of all drawn shapes
+ArrayList<Tool> drawnShapes = new ArrayList<Tool>();
 
 void setup() {
     // Set window size
     size(1280, 720);
+    surface.setResizable(true);
 
     // Initialize box colors with different shades of gray
     for (int i = 0; i < NUM_BOXES; i++) {
@@ -37,6 +53,22 @@ void draw() {
     
     // Draw canvas area
     drawCanvas();
+    
+    // Draw all shapes
+    for (Tool shape : drawnShapes) {
+        if (shape instanceof Shape) {
+            ((Shape)shape).display();
+        } else if (shape instanceof Freehand) {
+            ((Freehand)shape).display();
+        }
+    }
+    
+    // Draw current preview
+    if (currentTool instanceof Shape) {
+        ((Shape)currentTool).display();
+    } else if (currentTool instanceof Freehand && ((Freehand)currentTool).isDrawing) {
+        ((Freehand)currentTool).display();
+    }
 }
 
 void mousePressed() {
@@ -44,44 +76,113 @@ void mousePressed() {
     if (mouseY < BOX_HEIGHT) {
         int boxIndex = (int)(mouseX / (width / float(NUM_BOXES)));
         if (boxIndex >= 0 && boxIndex < NUM_BOXES) {
-            switch (boxIndex) {
-                case 0: // Square
-                    currentTool = shapes[0];
-                    break;
-                case 1: // Triangle
-                    currentTool = shapes[1];
-                    break;
-                case 2: // Line
-                    currentTool = shapes[2];
-                    break;
-                case 3: // Freehand
-                    break;
-                case 4: // Eraser
-                    break;
-                case 5: // Configure
-                    break;
-                
-            }
-        } else {
-            switch (currentTool.getType()) {
-                case "Square":
-                    // Set position of the square to mouse position and draw it
-                    break;
-                case "Triangle":
-                    // Set position of the triangle to mouse position and draw it
-                    break;
-                case "Line":
-                    // Set position of the line to mouse position and draw it
-                    // It should require 2 clicks to set start and end points
-                    break;
-                case "Freehand":
-                    // Draw freehand lines
-                    break;
-                case "Eraser":
-                    // Similar to freehand but with the same color as the background
-                    break;
-            }
+            getBox(boxIndex);
         }
+    } else {
+        useTool();
+    }
+}
+
+void getBox(int boxIndex) {
+    switch (boxIndex) {
+        case 0: // Square
+            currentTool = shapes[0];
+            lineFirstClick = true;
+            trianglePointsSet = 0;
+            break;
+        case 1: // Triangle
+            currentTool = shapes[1];
+            lineFirstClick = true;
+            trianglePointsSet = 0;
+            break;
+        case 2: // Line
+            currentTool = shapes[2];
+            lineFirstClick = true;
+            trianglePointsSet = 0;
+            break;
+        case 3: // Freehand
+            currentTool = freehand;
+            freehand.startDrawing(mouseX, mouseY);
+            lineFirstClick = true;
+            trianglePointsSet = 0;
+            break;
+        case 4: // Eraser
+            currentTool = eraser;
+            eraser.startDrawing(mouseX, mouseY);
+            lineFirstClick = true;
+            trianglePointsSet = 0;
+            break;
+        case 5: // Configure
+            break;
+    }
+}
+
+void useTool() {
+    switch (currentTool.getType()) {
+        case "Square":
+            Square square = new Square(mouseX, mouseY, 50, true, color(255, 0, 0), color(0));
+            drawnShapes.add(square);
+            break;
+        case "Triangle":
+            if (trianglePointsSet < 3) {
+                triangleX[trianglePointsSet] = mouseX;
+                triangleY[trianglePointsSet] = mouseY;
+                trianglePointsSet++;
+                
+                if (trianglePointsSet == 3) {
+                    Triangle triangle = new Triangle(
+                        triangleX[0], triangleY[0],
+                        triangleX[1], triangleY[1],
+                        triangleX[2], triangleY[2],
+                        true, color(0, 255, 0), color(0));
+                    drawnShapes.add(triangle);
+                    trianglePointsSet = 0;
+                }
+            }
+            break;
+        case "Line":
+            if (lineFirstClick) {
+                lineStartX = mouseX;
+                lineStartY = mouseY;
+                lineFirstClick = false;
+            } else {
+                Line line = new Line(lineStartX, lineStartY, mouseX, mouseY, color(0));
+                drawnShapes.add(line);
+                lineFirstClick = true;
+            }
+            break;
+        case "Freehand":
+            freehand.addPoint(mouseX, mouseY);
+            break;
+        case "Eraser":
+            eraser.addPoint(mouseX, mouseY);
+            break;
+    }
+}
+
+void mouseDragged() {
+    if (mouseY >= BOX_HEIGHT) {
+        switch (currentTool.getType()) {
+            case "Freehand":
+                freehand.addPoint(mouseX, mouseY);
+                break;
+            case "Eraser":
+                eraser.addPoint(mouseX, mouseY);
+                break;
+        }
+    }
+}
+
+void mouseReleased() {
+    switch (currentTool.getType()) {
+        case "Freehand":
+            freehand.stopDrawing();
+            drawnShapes.add(new Freehand(freehand));
+            break;
+        case "Eraser":
+            eraser.stopDrawing();
+            drawnShapes.add(new Eraser((Eraser)eraser));
+            break;
     }
 }
 
