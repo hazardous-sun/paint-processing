@@ -1,9 +1,19 @@
 // Box settings
-String[] boxNames = {"Square", "Triangle", "Star", "Freehand", "Eraser", "Configure"};
+String[] boxNames = {"Square", "Triangle", "Line", "Freehand", "Eraser", "Configure"};
 final int NUM_BOXES = boxNames.length;
 final int BOX_HEIGHT = 50;
 color[] boxColors = new color[NUM_BOXES];
 boolean[] boxHover = new boolean[NUM_BOXES];
+
+// Shapes to be drawn
+Shape[] shapes = {
+    new Square(0, 0, 5, false, color(255), color(0)),
+    new Triangle(0, 0, 0, 0, 0, 0, false, color(255), color(0))
+    new Line(0, 0, 0, 0, color(0))
+};
+
+// Curretly selected tool
+Shape currentTool = shapes[0];
 
 void setup() {
     // Set window size
@@ -34,7 +44,24 @@ void mousePressed() {
     if (mouseY < BOX_HEIGHT) {
         int boxIndex = (int)(mouseX / (width / float(NUM_BOXES)));
         if (boxIndex >= 0 && boxIndex < NUM_BOXES) {
-            println("Clicked:", boxNames[boxIndex]);
+            switch (boxIndex) {
+                case 0: // Square
+                    currentTool = shapes[0];
+                    break;
+                case 1: // Triangle
+                    currentTool = shapes[1];
+                    break;
+                case 2: // Line
+                    currentTool = shapes[2];
+                    break;
+                case 3: // Freehand
+                    break;
+                case 4: // Eraser
+                    break;
+                case 5: // Configure
+                    break;
+                
+            }
         }
     }
 }
