@@ -115,7 +115,7 @@ class Line extends Shape {
         line(x, y, x2, y2);
     }
 
-    void setPosition(int newX1, int newX2, int newX2, int newY2) {
+    void setPosition(int newX1, int newY1, int newX2, int newY2) {
         this.x = newX1;
         this.y = newY1;
         this.x2 = newX2;
