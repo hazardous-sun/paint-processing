@@ -9,40 +9,42 @@ color[] boxColors = new color[NUM_BOXES];
 boolean[] boxHover = new boolean[NUM_BOXES];
 
 void setup() {
-  size(800, 600);
-  surface.setResizable(true);
-  
-  // Initialize box colors with different shades of gray
-  for (int i = 0; i < NUM_BOXES; i++) {
-    boxColors[i] = color(50 + i * 30);
-    boxHover[i] = false;
-  }
-  
-  noStroke();
-  textAlign(CENTER, CENTER);
+    // Set window size
+    size(1280, 720);
+
+    // Initialize box colors with different shades of gray
+    for (int i = 0; i < NUM_BOXES; i++) {
+        boxColors[i] = color(50 + i * 30);
+        boxHover[i] = false;
+    }
+
+    noStroke();
+    textAlign(CENTER, CENTER);
 }
 
 void draw() {
-  background(255);
-  
-  // Draw options boxes
-  drawBoxes();
-  
-  // Draw canvas area
-  drawCanvas();
+    background(255);
+
+    // Draw options boxes
+    drawBoxes();
+    
+    // Draw canvas area
+    drawCanvas();
 }
 
 void mousePressed() {
-  // Check if mouse is in a box
-  if (mouseY < BOX_HEIGHT) {
-    int boxIndex = (int)(mouseX / (width / float(NUM_BOXES)));
-    if (boxIndex >= 0 && boxIndex < NUM_BOXES) {
-      println("Clicked:", boxNames[boxIndex]);
+    // Check if mouse is in a box
+    if (mouseY < BOX_HEIGHT) {
+        int boxIndex = (int)(mouseX / (width / float(NUM_BOXES)));
+        if (boxIndex >= 0 && boxIndex < NUM_BOXES) {
+            println("Clicked:", boxNames[boxIndex]);
+        }
     }
-  }
 }
 
 void drawBoxes() {
+    stroke(0);
+    strokeWeight(3);
     for (int i = 0; i < NUM_BOXES; i++) {
         float boxWidth = width / float(NUM_BOXES);
         float x = i * boxWidth;
@@ -60,6 +62,7 @@ void drawBoxes() {
         fill(getBrightness(boxColors[i]) > 128 ? 0 : 255);
         text(boxNames[i], x + boxWidth/2, BOX_HEIGHT/2);
     }
+    noStroke();
 }
 
 void drawCanvas() {
@@ -68,20 +71,20 @@ void drawCanvas() {
 }
 
 void mouseMoved() {
-  // Update hover states
-  if (mouseY < BOX_HEIGHT) {
-    for (int i = 0; i < NUM_BOXES; i++) {
-      float boxWidth = width / float(NUM_BOXES);
-      boxHover[i] = (mouseX >= i * boxWidth && mouseX < (i + 1) * boxWidth);
+    // Update hover states
+    if (mouseY < BOX_HEIGHT) {
+        for (int i = 0; i < NUM_BOXES; i++) {
+            float boxWidth = width / float(NUM_BOXES);
+            boxHover[i] = (mouseX >= i * boxWidth && mouseX < (i + 1) * boxWidth);
+        }
+    } else {
+        for (int i = 0; i < NUM_BOXES; i++) {
+            boxHover[i] = false;
+        }
     }
-  } else {
-    for (int i = 0; i < NUM_BOXES; i++) {
-      boxHover[i] = false;
-    }
-  }
 }
 
 // Helper function to get brightness of a color
 float getBrightness(color c) {
-  return (red(c) + green(c) + blue(c)) / 3.0;
+    return (red(c) + green(c) + blue(c)) / 3.0;
 }
