@@ -127,6 +127,64 @@ class Line extends Shape {
     }
 }
 
-class Freehand {
+class Freehand extends Tool {
+    ArrayList<PVector> points;
+    color strokeColor;
+    boolean isDrawing;
+    
+    Freehand(color strokeColor) {
+        this.strokeColor = strokeColor;
+        points = new ArrayList<PVector>();
+        isDrawing = false;
+    }
 
+    Freehand(Freehand other) {
+        this.strokeColor = other.strokeColor;
+        this.points = new ArrayList<PVector>(other.points);
+        this.isDrawing = false;
+    }
+    
+    void startDrawing(int x, int y) {
+        points.clear();
+        points.add(new PVector(x, y));
+        isDrawing = true;
+    }
+    
+    void addPoint(int x, int y) {
+        if (isDrawing) {
+            points.add(new PVector(x, y));
+        }
+    }
+    
+    void stopDrawing() {
+        isDrawing = false;
+    }
+    
+    void display() {
+        stroke(strokeColor);
+        noFill();
+        beginShape();
+        for (PVector point : points) {
+            vertex(point.x, point.y);
+        }
+        endShape();
+    }
+    
+    String getType() {
+        return "Freehand";
+    }
+}
+
+class Eraser extends Freehand {
+    Eraser() {
+        super(color(255)); // White color for eraser
+    }
+
+    Eraser(Eraser other) {
+        super(other);
+    }
+    
+    String getType() {
+        return "Eraser";
+    }
 }
