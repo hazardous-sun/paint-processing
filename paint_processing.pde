@@ -1,8 +1,5 @@
-// Template with 6 color boxes and drawing canvas
-// Click on boxes to print their names
-
 // Box settings
-String[] boxNames = {"Square", "Triangle", "Star", "Freehand", "Eraser"};
+String[] boxNames = {"Square", "Triangle", "Star", "Freehand", "Eraser", "Configure"};
 final int NUM_BOXES = boxNames.length;
 final int BOX_HEIGHT = 50;
 color[] boxColors = new color[NUM_BOXES];
@@ -84,7 +81,6 @@ void mouseMoved() {
     }
 }
 
-// Helper function to get brightness of a color
 float getBrightness(color c) {
     return (red(c) + green(c) + blue(c)) / 3.0;
 }
