@@ -13,20 +13,14 @@ abstract class Shape {
     }
     
     abstract void display();
-    
-    void move(int newX, int newY) {
-        x = newX;
-        y = newY;
-    }
 }
 
 class Square extends Shape {
-    int w, h;
+    int size;
   
-    Square(int x, int y, int w, int h, boolean filled, color innerColor, color strokeColor) {
+    Square(int x, int y, int size, boolean filled, color innerColor, color strokeColor) {
         super(x, y, filled, innerColor, strokeColor);
-        this.w = w;
-        this.h = h;
+        this.size = size;
     }
   
     void display() {
@@ -38,15 +32,14 @@ class Square extends Shape {
         }
         
         // Draw the four sides of the rectangle
-        line(x, y, x + w, y);         // Top line
-        line(x + w, y, x + w, y + h); // Right line
-        line(x + w, y + h, x, y + h); // Bottom line
-        line(x, y + h, x, y);         // Left line
+        line(x, y, x + size, y);               // Top line
+        line(x + size, y, x + size, y + size); // Right line
+        line(x + size, y + size, x, y + size); // Bottom line
+        line(x, y + size, x, y);               // Left line
     }
     
-    void resize(int newW, int newH) {
-        w = newW;
-        h = newH;
+    void resize(int newSize) {
+        this.size = newSize;
     }
 }
 
@@ -75,6 +68,19 @@ class Triangle extends Shape {
         line(x2, y2, x3, y3);
         line(x3, y3, x, y);
     }
+
+    void resize(float scaleFactor) {
+        float centerX = (x + x2 + x3) / 3.0f;
+        float centerY = (y + y2 + y3) / 3.0f;
+        
+        // Scale each point relative to the center
+        this.x  = (int)(centerX + (x - centerX) * scaleFactor);
+        this.y  = (int)(centerY + (y - centerY) * scaleFactor);
+        this.x2 = (int)(centerX + (x2 - centerX) * scaleFactor);
+        this.y2 = (int)(centerY + (y2 - centerY) * scaleFactor);
+        this.x3 = (int)(centerX + (x3 - centerX) * scaleFactor);
+        this.y3 = (int)(centerY + (y3 - centerY) * scaleFactor);
+    }
 }
 
 class Line extends Shape {
@@ -90,5 +96,10 @@ class Line extends Shape {
         stroke(strokeColor);
         noFill();
         line(x, y, x2, y2);
+    }
+
+    void resize(int newX2, int newY2) {
+        this.x2 = newX2;
+        this.y2 = newY2;
     }
 }
