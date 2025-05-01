@@ -1,4 +1,8 @@
-abstract class Shape {
+abstract class Tool {
+    abstract String getType();
+}
+
+abstract class Shape extends Tool {
     int x, y;
     boolean filled;
     color innerColor;
@@ -41,6 +45,15 @@ class Square extends Shape {
     void resize(int newSize) {
         this.size = newSize;
     }
+
+    String getType() {
+        return "Square";
+    }
+
+    void setPosition(int newX, int newY) {
+        this.x = newX;
+        this.y = newY;
+    }
 }
 
 class Triangle extends Shape {
@@ -81,6 +94,10 @@ class Triangle extends Shape {
         this.x3 = (int)(centerX + (x3 - centerX) * scaleFactor);
         this.y3 = (int)(centerY + (y3 - centerY) * scaleFactor);
     }
+
+    String getType() {
+        return "Triangle";
+    }
 }
 
 class Line extends Shape {
@@ -98,8 +115,18 @@ class Line extends Shape {
         line(x, y, x2, y2);
     }
 
-    void resize(int newX2, int newY2) {
+    void setPosition(int newX1, int newX2, int newX2, int newY2) {
+        this.x = newX1;
+        this.y = newY1;
         this.x2 = newX2;
         this.y2 = newY2;
     }
+
+    String getType() {
+        return "Line";
+    }
+}
+
+class Freehand {
+
 }
