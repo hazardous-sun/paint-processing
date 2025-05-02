@@ -1,3 +1,7 @@
+import processing.awt.PSurfaceAWT;
+import javax.swing.*;
+ConfigWindow configWindow;
+
 // Box settings
 String[] boxNames = {"Square", "Triangle", "Line", "Freehand", "Eraser", "Configure"};
 final int NUM_BOXES = boxNames.length;
@@ -111,6 +115,15 @@ void getBox(int boxIndex) {
             trianglePointsSet = 0;
             break;
         case 5: // Configure
+            if (currentTool instanceof Shape) {
+                // Close existing config window if open
+                if (configWindow != null && configWindow.isOpen) {
+                   configWindow.exit(); // Properly close the window
+                }
+                // Create new config window
+                configWindow = new ConfigWindow((Shape)currentTool);
+                PApplet.runSketch(new String[]{"Config"}, configWindow);
+            }
             break;
     }
 }
@@ -234,4 +247,11 @@ void mouseMoved() {
 
 float getBrightness(color c) {
     return (red(c) + green(c) + blue(c)) / 3.0;
+}
+
+void exit() {
+    if (configWindow != null && configWindow.isOpen) {
+        configWindow.exit();
+    }
+    super.exit();
 }
