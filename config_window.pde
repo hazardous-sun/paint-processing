@@ -130,4 +130,9 @@ class ConfigWindow extends PApplet {
         getSurface().setAlwaysOnTop(true);
         getSurface().setAlwaysOnTop(false);
     }
+    
+    void exit() {
+        isOpen = false; // Mark window as closed
+        getSurface().setVisible(false); // Hide the window instead of terminating
+    }
 }
