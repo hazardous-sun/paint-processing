@@ -208,7 +208,8 @@ void useTool() {
                         triangleX[0], triangleY[0],
                         triangleX[1], triangleY[1],
                         triangleX[2], triangleY[2],
-                        filled, color(fillR, fillG, fillB), 
+                        filled, 
+                        color(fillR, fillG, fillB), 
                         color(strokeR, strokeG, strokeB),
                         strokeWeightValue);
                     drawnShapes.add(triangle);
