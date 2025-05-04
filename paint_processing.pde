@@ -90,16 +90,10 @@ void updateConfigFromCurrentTool() {
     } else if (currentTool instanceof Eraser) {
         strokeWeightValue = ((Eraser)currentTool).strokeWeight;
     }
-}void draw() {
+}
+
+void draw() {
     background(255);
-    
-    // Draw options boxes
-    drawBoxes();
-    
-    // Draw config panel if needed
-    if (showConfigPanel) {
-        drawConfigPanel();
-    }
     
     // Draw canvas area (adjust for config panel height)
     float canvasTop = BOX_HEIGHT + (showConfigPanel ? configPanelHeight : 0);
@@ -120,6 +114,14 @@ void updateConfigFromCurrentTool() {
         ((Shape)currentTool).display();
     } else if (currentTool instanceof Freehand && ((Freehand)currentTool).isDrawing) {
         ((Freehand)currentTool).display();
+    }
+
+    // Draw options boxes
+    drawBoxes();
+    
+    // Draw config panel if needed
+    if (showConfigPanel) {
+        drawConfigPanel();
     }
 }
 
