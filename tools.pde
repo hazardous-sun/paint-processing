@@ -73,6 +73,42 @@ class Triangle extends Shape {
     }
 }
 
+class Star extends Shape {
+    int outerRadius;
+    int innerRadius;
+    
+    Star(int x, int y, int size, boolean filled, 
+        color innerColor, color strokeColor, float strokeWeight) {
+        super(x, y, filled, innerColor, strokeColor, strokeWeight);
+        this.outerRadius = size;
+        this.innerRadius = size/2;  // Inner radius is always half of size
+    }
+    
+    void display() {
+        stroke(strokeColor);
+        strokeWeight(strokeWeight);
+        if (filled) {
+            fill(innerColor);
+        } else {
+            noFill();
+        }
+        
+        beginShape();
+        float angle = TWO_PI / 10;
+        for (int i = 0; i < 10; i++) {
+            float radius = i % 2 == 0 ? outerRadius : innerRadius;
+            float px = x + cos(angle * i - HALF_PI) * radius;
+            float py = y + sin(angle * i - HALF_PI) * radius;
+            vertex(px, py);
+        }
+        endShape(CLOSE);
+    }
+    
+    String getType() {
+        return "Star";
+    }
+}
+
 class Line extends Shape {
     int x2, y2;
     

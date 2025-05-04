@@ -11,7 +11,7 @@ float strokeWeightValue = 1;
 int configPanelHeight = 120;
 
 // Box settings
-String[] boxNames = {"Square", "Triangle", "Line", "Freehand", "Eraser", "Configure"};
+String[] boxNames = {"Square", "Triangle", "Line", "Star", "Freehand", "Eraser", "Configure"};
 final int NUM_BOXES = boxNames.length;
 final int BOX_HEIGHT = 50;
 color[] boxColors = new color[NUM_BOXES];
@@ -21,9 +21,16 @@ boolean[] boxHover = new boolean[NUM_BOXES];
 Shape[] shapes = {
     new Square(0, 0, 50, false, color(255), color(0), 1),
     new Triangle(0, 0, 0, 0, 0, 0, false, color(255), color(0), 1),
-    new Line(0, 0, 0, 0, color(0), 1)
+    new Line(0, 0, 0, 0, color(0), 1),
+    new Star(0, 0, 30, false, color(255), color(0), 1) 
 };
 
+// Star shape parameters
+int starOuterRadius = 30;
+int starInnerRadius = 15;
+int starSize = 30;
+
+// Freehand and Eraser tools
 Freehand freehand = new Freehand(color(0), 1);
 Eraser eraser = new Eraser(10); // Eraser has thicker default stroke
 
@@ -155,19 +162,25 @@ void getBox(int boxIndex) {
             trianglePointsSet = 0;
             showConfigPanel = true;
             break;
-        case 3: // Freehand
+        case 3: // Star
+            currentTool = shapes[3];
+            lineFirstClick = true;
+            trianglePointsSet = 0;
+            showConfigPanel = true;
+            break;
+        case 4: // Freehand
             currentTool = freehand;
             lineFirstClick = true;
             trianglePointsSet = 0;
             showConfigPanel = true;
             break;
-        case 4: // Eraser
+        case 5: // Eraser
             currentTool = eraser;
             lineFirstClick = true;
             trianglePointsSet = 0;
             showConfigPanel = true;
             break;
-        case 5: // Configure (toggle panel)
+        case 6: // Configure (toggle panel)
             showConfigPanel = !showConfigPanel;
             break;
     }
@@ -215,6 +228,13 @@ void useTool() {
                 drawnShapes.add(line);
                 lineFirstClick = true;
             }
+            break;
+        case "Star":
+            Star star = new Star(mouseX, mouseY, starSize, 
+                            filled, color(fillR, fillG, fillB), 
+                            color(strokeR, strokeG, strokeB),
+                            strokeWeightValue);
+            drawnShapes.add(star);
             break;
         case "Freehand":
             Freehand fh = (Freehand) currentTool;
@@ -315,31 +335,37 @@ void drawConfigPanel() {
         fillG = numberInput(230, BOX_HEIGHT + 10, fillG, 0, 255);
         fillB = numberInput(280, BOX_HEIGHT + 10, fillB, 0, 255);
         
+        // Stroke color inputs
+        strokeR = numberInput(180, BOX_HEIGHT + 40, strokeR, 0, 255);
+        strokeG = numberInput(230, BOX_HEIGHT + 40, strokeG, 0, 255);
+        strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
+        
         // Filled checkbox
         filled = checkbox(350, BOX_HEIGHT + 10, "Filled", filled);
         
-        // Size slider (only for Square)
-        if (currentTool instanceof Square) {
+        // Size slider for Square and Star
+        if (currentTool instanceof Square || currentTool instanceof Star) {
             text("Size:", 350, BOX_HEIGHT + 40);
-            sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
+            if (currentTool instanceof Square) {
+                sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
+            } else { // Star
+                starSize = (int)slider(400, BOX_HEIGHT + 40, starSize, 10, 200);
+                // Calculate radii based on size
+                starOuterRadius = starSize;
+                starInnerRadius = starSize/2;
+            }
         }
     } 
     else if (currentTool instanceof Freehand) {
         text("Line Color (R,G,B):", 20, BOX_HEIGHT + 10);
+        strokeR = numberInput(180, BOX_HEIGHT + 10, strokeR, 0, 255);
+        strokeG = numberInput(230, BOX_HEIGHT + 10, strokeG, 0, 255);
+        strokeB = numberInput(280, BOX_HEIGHT + 10, strokeB, 0, 255);
     }
     
     // Common options for all tools
     text("Stroke Weight:", 20, BOX_HEIGHT + 70);
-    
-    // Stroke color inputs (for shapes and freehand)
-    if (currentTool instanceof Shape || currentTool instanceof Freehand) {
-        strokeR = numberInput(180, BOX_HEIGHT + 40, strokeR, 0, 255);
-        strokeG = numberInput(230, BOX_HEIGHT + 40, strokeG, 0, 255);
-        strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
-    }
-    
-    // Stroke weight slider - CHANGED MAX FROM 20 TO 255
-    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 50);
+    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 255);
     fill(0);
     text(nf(strokeWeightValue, 1, 1), 400, BOX_HEIGHT + 70);
     
@@ -354,11 +380,17 @@ void drawConfigPanel() {
         if (currentTool instanceof Square) {
             ((Square)currentTool).size = sizeValue;
         }
-    } else if (currentTool instanceof Freehand) {
+        else if (currentTool instanceof Star) {
+            ((Star)currentTool).outerRadius = starOuterRadius;
+            ((Star)currentTool).innerRadius = starInnerRadius;
+        }
+    } 
+    else if (currentTool instanceof Freehand) {
         Freehand fh = (Freehand)currentTool;
         fh.strokeColor = color(strokeR, strokeG, strokeB);
         fh.strokeWeight = strokeWeightValue;
-    } else if (currentTool instanceof Eraser) {
+    } 
+    else if (currentTool instanceof Eraser) {
         ((Eraser)currentTool).strokeWeight = strokeWeightValue;
     }
 }
