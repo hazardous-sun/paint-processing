@@ -1,4 +1,5 @@
 abstract class Tool {
+    float strokeWeight;
     abstract String getType();
 }
 
@@ -8,12 +9,13 @@ abstract class Shape extends Tool {
     color innerColor;
     color strokeColor;
     
-    Shape(int x, int y, boolean filled, color innerColor, color strokeColor) {
+    Shape(int x, int y, boolean filled, color innerColor, color strokeColor, float strokeWeight) {
         this.x = x;
         this.y = y;
         this.filled = filled;
         this.innerColor = innerColor;
         this.strokeColor = strokeColor;
+        this.strokeWeight = strokeWeight;
     }
     
     abstract void display();
@@ -22,37 +24,24 @@ abstract class Shape extends Tool {
 class Square extends Shape {
     int size;
   
-    Square(int x, int y, int size, boolean filled, color innerColor, color strokeColor) {
-        super(x, y, filled, innerColor, strokeColor);
+    Square(int x, int y, int size, boolean filled, color innerColor, color strokeColor, float strokeWeight) {
+        super(x, y, filled, innerColor, strokeColor, strokeWeight);
         this.size = size;
     }
   
     void display() {
         stroke(strokeColor);
+        strokeWeight(strokeWeight);
         if (filled) {
             fill(innerColor);
         } else {
             noFill();
         }
-        
-        // Draw the four sides of the rectangle
-        line(x, y, x + size, y);               // Top line
-        line(x + size, y, x + size, y + size); // Right line
-        line(x + size, y + size, x, y + size); // Bottom line
-        line(x, y + size, x, y);               // Left line
-    }
-    
-    void resize(int newSize) {
-        this.size = newSize;
+        rect(x, y, size, size);
     }
 
     String getType() {
         return "Square";
-    }
-
-    void setPosition(int newX, int newY) {
-        this.x = newX;
-        this.y = newY;
     }
 }
 
@@ -60,8 +49,8 @@ class Triangle extends Shape {
     int x2, y2, x3, y3;
     
     Triangle(int x1, int y1, int x2, int y2, int x3, int y3, 
-             boolean filled, color innerColor, color strokeColor) {
-        super(x1, y1, filled, innerColor, strokeColor);
+             boolean filled, color innerColor, color strokeColor, float strokeWeight) {
+        super(x1, y1, filled, innerColor, strokeColor, strokeWeight);
         this.x2 = x2;
         this.y2 = y2;
         this.x3 = x3;
@@ -70,29 +59,13 @@ class Triangle extends Shape {
     
     void display() {
         stroke(strokeColor);
+        strokeWeight(strokeWeight);
         if (filled) {
             fill(innerColor);
         } else {
             noFill();
         }
-        
-        // Draw the three sides of the triangle
-        line(x, y, x2, y2);
-        line(x2, y2, x3, y3);
-        line(x3, y3, x, y);
-    }
-
-    void resize(float scaleFactor) {
-        float centerX = (x + x2 + x3) / 3.0f;
-        float centerY = (y + y2 + y3) / 3.0f;
-        
-        // Scale each point relative to the center
-        this.x  = (int)(centerX + (x - centerX) * scaleFactor);
-        this.y  = (int)(centerY + (y - centerY) * scaleFactor);
-        this.x2 = (int)(centerX + (x2 - centerX) * scaleFactor);
-        this.y2 = (int)(centerY + (y2 - centerY) * scaleFactor);
-        this.x3 = (int)(centerX + (x3 - centerX) * scaleFactor);
-        this.y3 = (int)(centerY + (y3 - centerY) * scaleFactor);
+        triangle(x, y, x2, y2, x3, y3);
     }
 
     String getType() {
@@ -103,23 +76,17 @@ class Triangle extends Shape {
 class Line extends Shape {
     int x2, y2;
     
-    Line(int x1, int y1, int x2, int y2, color strokeColor) {
-        super(x1, y1, false, 0, strokeColor); // Lines can't be filled
+    Line(int x1, int y1, int x2, int y2, color strokeColor, float strokeWeight) {
+        super(x1, y1, false, color(0), strokeColor, strokeWeight);
         this.x2 = x2;
         this.y2 = y2;
     }
     
     void display() {
         stroke(strokeColor);
+        strokeWeight(strokeWeight);
         noFill();
         line(x, y, x2, y2);
-    }
-
-    void setPosition(int newX1, int newY1, int newX2, int newY2) {
-        this.x = newX1;
-        this.y = newY1;
-        this.x2 = newX2;
-        this.y2 = newY2;
     }
 
     String getType() {
@@ -132,14 +99,16 @@ class Freehand extends Tool {
     color strokeColor;
     boolean isDrawing;
     
-    Freehand(color strokeColor) {
+    Freehand(color strokeColor, float strokeWeight) {
         this.strokeColor = strokeColor;
+        this.strokeWeight = strokeWeight;
         points = new ArrayList<PVector>();
         isDrawing = false;
     }
 
     Freehand(Freehand other) {
         this.strokeColor = other.strokeColor;
+        this.strokeWeight = other.strokeWeight;
         this.points = new ArrayList<PVector>(other.points);
         this.isDrawing = false;
     }
@@ -162,6 +131,7 @@ class Freehand extends Tool {
     
     void display() {
         stroke(strokeColor);
+        strokeWeight(strokeWeight);
         noFill();
         beginShape();
         for (PVector point : points) {
@@ -176,8 +146,8 @@ class Freehand extends Tool {
 }
 
 class Eraser extends Freehand {
-    Eraser() {
-        super(color(255)); // White color for eraser
+    Eraser(float strokeWeight) {
+        super(color(255), strokeWeight); // Always white
     }
 
     Eraser(Eraser other) {

@@ -2,12 +2,13 @@ import processing.awt.PSurfaceAWT;
 import javax.swing.*;
 
 // Tool configuration variables
-boolean showConfigPanel = false;
+boolean showConfigPanel = true; // Always show by default
 float fillR = 0, fillG = 0, fillB = 0;
 float strokeR = 0, strokeG = 0, strokeB = 0;
 boolean filled = true;
 int sizeValue = 50;
-int configPanelHeight = 100;
+float strokeWeightValue = 1;
+int configPanelHeight = 120;
 
 // Box settings
 String[] boxNames = {"Square", "Triangle", "Line", "Freehand", "Eraser", "Configure"};
@@ -18,13 +19,13 @@ boolean[] boxHover = new boolean[NUM_BOXES];
 
 // Shapes to be drawn
 Shape[] shapes = {
-    new Square(0, 0, 50, false, color(255), color(0)),
-    new Triangle(0, 0, 0, 0, 0, 0, false, color(255), color(0)),
-    new Line(0, 0, 0, 0, color(0))
+    new Square(0, 0, 50, false, color(255), color(0), 1),
+    new Triangle(0, 0, 0, 0, 0, 0, false, color(255), color(0), 1),
+    new Line(0, 0, 0, 0, color(0), 1)
 };
 
-Freehand freehand = new Freehand(color(0));
-Eraser eraser = new Eraser();
+Freehand freehand = new Freehand(color(0), 1);
+Eraser eraser = new Eraser(10); // Eraser has thicker default stroke
 
 // Currently selected tool
 Tool currentTool = shapes[0];
@@ -52,6 +53,13 @@ void setup() {
     }
 
     // Initialize config values
+    updateConfigFromCurrentTool();
+
+    noStroke();
+    textAlign(CENTER, CENTER);
+}
+
+void updateConfigFromCurrentTool() {
     if (currentTool instanceof Shape) {
         Shape shape = (Shape)currentTool;
         fillR = red(shape.innerColor);
@@ -61,20 +69,30 @@ void setup() {
         strokeG = green(shape.strokeColor);
         strokeB = blue(shape.strokeColor);
         filled = shape.filled;
+        strokeWeightValue = shape.strokeWeight;
+        
+        if (currentTool instanceof Square) {
+            sizeValue = ((Square)currentTool).size;
+        }
+    } else if (currentTool instanceof Freehand) {
+        Freehand fh = (Freehand)currentTool;
+        strokeR = red(fh.strokeColor);
+        strokeG = green(fh.strokeColor);
+        strokeB = blue(fh.strokeColor);
+        strokeWeightValue = fh.strokeWeight;
+    } else if (currentTool instanceof Eraser) {
+        strokeWeightValue = ((Eraser)currentTool).strokeWeight;
     }
-
-    noStroke();
-    textAlign(CENTER, CENTER);
-}
-
-void draw() {
+}void draw() {
     background(255);
     
     // Draw options boxes
     drawBoxes();
     
     // Draw config panel if needed
-    drawConfigPanel();
+    if (showConfigPanel) {
+        drawConfigPanel();
+    }
     
     // Draw canvas area (adjust for config panel height)
     float canvasTop = BOX_HEIGHT + (showConfigPanel ? configPanelHeight : 0);
@@ -141,42 +159,29 @@ void getBox(int boxIndex) {
             currentTool = freehand;
             lineFirstClick = true;
             trianglePointsSet = 0;
-            showConfigPanel = false;
+            showConfigPanel = true;
             break;
         case 4: // Eraser
             currentTool = eraser;
             lineFirstClick = true;
             trianglePointsSet = 0;
-            showConfigPanel = false;
+            showConfigPanel = true;
             break;
-        case 5: // Configure (toggle panel for supported tools)
-            if (currentTool instanceof Shape) {
-                showConfigPanel = !showConfigPanel;
-            }
+        case 5: // Configure (toggle panel)
+            showConfigPanel = !showConfigPanel;
             break;
     }
     
-    // Update config values when switching tools
-    if (currentTool instanceof Shape) {
-        Shape shape = (Shape)currentTool;
-        fillR = red(shape.innerColor);
-        fillG = green(shape.innerColor);
-        fillB = blue(shape.innerColor);
-        strokeR = red(shape.strokeColor);
-        strokeG = green(shape.strokeColor);
-        strokeB = blue(shape.strokeColor);
-        filled = shape.filled;
-        
-        if (currentTool instanceof Square) {
-            sizeValue = ((Square)currentTool).size;
-        }
-    }
+    updateConfigFromCurrentTool();
 }
 
 void useTool() {
     switch (currentTool.getType()) {
         case "Square":
-            Square square = new Square(mouseX, mouseY, sizeValue, filled, color(fillR, fillG, fillB), color(strokeR, strokeG, strokeB));
+            Square square = new Square(mouseX, mouseY, sizeValue, filled, 
+                                    color(fillR, fillG, fillB), 
+                                    color(strokeR, strokeG, strokeB), 
+                                    strokeWeightValue);
             drawnShapes.add(square);
             break;
         case "Triangle":
@@ -190,7 +195,9 @@ void useTool() {
                         triangleX[0], triangleY[0],
                         triangleX[1], triangleY[1],
                         triangleX[2], triangleY[2],
-                        filled, color(fillR, fillG, fillB), color(strokeR, strokeG, strokeB));
+                        filled, color(fillR, fillG, fillB), 
+                        color(strokeR, strokeG, strokeB),
+                        strokeWeightValue);
                     drawnShapes.add(triangle);
                     trianglePointsSet = 0;
                 }
@@ -202,19 +209,24 @@ void useTool() {
                 lineStartY = mouseY;
                 lineFirstClick = false;
             } else {
-                Line line = new Line(lineStartX, lineStartY, mouseX, mouseY, color(strokeR, strokeG, strokeB));
+                Line line = new Line(lineStartX, lineStartY, mouseX, mouseY, 
+                                   color(strokeR, strokeG, strokeB),
+                                   strokeWeightValue);
                 drawnShapes.add(line);
                 lineFirstClick = true;
             }
             break;
         case "Freehand":
             Freehand fh = (Freehand) currentTool;
+            fh.strokeColor = color(strokeR, strokeG, strokeB);
+            fh.strokeWeight = strokeWeightValue;
             if (!fh.isDrawing) {
                 fh.startDrawing(mouseX, mouseY);
             }
             break;
         case "Eraser":
             Eraser es = (Eraser) currentTool;
+            es.strokeWeight = strokeWeightValue;
             if (!es.isDrawing) {
                 es.startDrawing(mouseX, mouseY);
             }
@@ -280,27 +292,44 @@ void drawConfigPanel() {
     
     fill(0);
     textAlign(LEFT, TOP);
-    text("Fill Color (R,G,B):", 20, BOX_HEIGHT + 10);
-    text("Stroke Color (R,G,B):", 20, BOX_HEIGHT + 40);
     
-    // Fill color inputs
-    fillR = numberInput(180, BOX_HEIGHT + 10, fillR, 0, 255);
-    fillG = numberInput(230, BOX_HEIGHT + 10, fillG, 0, 255);
-    fillB = numberInput(280, BOX_HEIGHT + 10, fillB, 0, 255);
-    
-    // Stroke color inputs
-    strokeR = numberInput(180, BOX_HEIGHT + 40, strokeR, 0, 255);
-    strokeG = numberInput(230, BOX_HEIGHT + 40, strokeG, 0, 255);
-    strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
-    
-    // Filled checkbox
-    filled = checkbox(350, BOX_HEIGHT + 10, "Filled", filled);
-    
-    // Size slider (only for Square)
-    if (currentTool instanceof Square) {
-        text("Size:", 350, BOX_HEIGHT + 40);
-        sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
+    // Different options for different tools
+    if (currentTool instanceof Shape) {
+        text("Fill Color (R,G,B):", 20, BOX_HEIGHT + 10);
+        text("Stroke Color (R,G,B):", 20, BOX_HEIGHT + 40);
+        
+        // Fill color inputs
+        fillR = numberInput(180, BOX_HEIGHT + 10, fillR, 0, 255);
+        fillG = numberInput(230, BOX_HEIGHT + 10, fillG, 0, 255);
+        fillB = numberInput(280, BOX_HEIGHT + 10, fillB, 0, 255);
+        
+        // Filled checkbox
+        filled = checkbox(350, BOX_HEIGHT + 10, "Filled", filled);
+        
+        // Size slider (only for Square)
+        if (currentTool instanceof Square) {
+            text("Size:", 350, BOX_HEIGHT + 40);
+            sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
+        }
+    } 
+    else if (currentTool instanceof Freehand) {
+        text("Line Color (R,G,B):", 20, BOX_HEIGHT + 10);
     }
+    
+    // Common options for all tools
+    text("Stroke Weight:", 20, BOX_HEIGHT + 70);
+    
+    // Stroke color inputs (for shapes and freehand)
+    if (currentTool instanceof Shape || currentTool instanceof Freehand) {
+        strokeR = numberInput(180, BOX_HEIGHT + 40, strokeR, 0, 255);
+        strokeG = numberInput(230, BOX_HEIGHT + 40, strokeG, 0, 255);
+        strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
+    }
+    
+    // Stroke weight slider
+    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 20);
+    fill(0);
+    text(nf(strokeWeightValue, 1, 1), 400, BOX_HEIGHT + 70);
     
     // Update the current tool's properties
     if (currentTool instanceof Shape) {
@@ -308,10 +337,17 @@ void drawConfigPanel() {
         shape.innerColor = color(fillR, fillG, fillB);
         shape.strokeColor = color(strokeR, strokeG, strokeB);
         shape.filled = filled;
+        shape.strokeWeight = strokeWeightValue;
         
         if (currentTool instanceof Square) {
             ((Square)currentTool).size = sizeValue;
         }
+    } else if (currentTool instanceof Freehand) {
+        Freehand fh = (Freehand)currentTool;
+        fh.strokeColor = color(strokeR, strokeG, strokeB);
+        fh.strokeWeight = strokeWeightValue;
+    } else if (currentTool instanceof Eraser) {
+        ((Eraser)currentTool).strokeWeight = strokeWeightValue;
     }
 }
 
