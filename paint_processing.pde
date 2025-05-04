@@ -251,11 +251,23 @@ void mouseReleased() {
     switch (currentTool.getType()) {
         case "Freehand":
             freehand.stopDrawing();
-            drawnShapes.add(new Freehand(freehand));
+            // Create a NEW Freehand object with current properties
+            Freehand newFreehand = new Freehand(color(strokeR, strokeG, strokeB), strokeWeightValue);
+            newFreehand.points = new ArrayList<PVector>(freehand.points);
+            drawnShapes.add(newFreehand);
+            // Reset the active freehand tool
+            freehand = new Freehand(color(strokeR, strokeG, strokeB), strokeWeightValue);
+            currentTool = freehand;
             break;
         case "Eraser":
             eraser.stopDrawing();
-            drawnShapes.add(new Eraser((Eraser)eraser));
+            // Create a NEW Eraser object with current properties
+            Eraser newEraser = new Eraser(strokeWeightValue);
+            newEraser.points = new ArrayList<PVector>(eraser.points);
+            drawnShapes.add(newEraser);
+            // Reset the active eraser tool
+            eraser = new Eraser(strokeWeightValue);
+            currentTool = eraser;
             break;
     }
 }
@@ -326,8 +338,8 @@ void drawConfigPanel() {
         strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
     }
     
-    // Stroke weight slider
-    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 20);
+    // Stroke weight slider - CHANGED MAX FROM 20 TO 255
+    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 50);
     fill(0);
     text(nf(strokeWeightValue, 1, 1), 400, BOX_HEIGHT + 70);
     

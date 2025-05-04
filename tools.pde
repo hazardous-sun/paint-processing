@@ -102,8 +102,8 @@ class Freehand extends Tool {
     Freehand(color strokeColor, float strokeWeight) {
         this.strokeColor = strokeColor;
         this.strokeWeight = strokeWeight;
-        points = new ArrayList<PVector>();
-        isDrawing = false;
+        this.points = new ArrayList<PVector>();
+        this.isDrawing = false;
     }
 
     Freehand(Freehand other) {
@@ -147,7 +147,7 @@ class Freehand extends Tool {
 
 class Eraser extends Freehand {
     Eraser(float strokeWeight) {
-        super(color(255), strokeWeight); // Always white
+        super(color(255), strokeWeight);
     }
 
     Eraser(Eraser other) {
