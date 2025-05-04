@@ -1,6 +1,13 @@
 import processing.awt.PSurfaceAWT;
 import javax.swing.*;
-ConfigWindow configWindow;
+
+// Tool configuration variables
+boolean showConfigPanel = false;
+float fillR = 0, fillG = 0, fillB = 0;
+float strokeR = 0, strokeG = 0, strokeB = 0;
+boolean filled = true;
+int sizeValue = 50;
+int configPanelHeight = 100;
 
 // Box settings
 String[] boxNames = {"Square", "Triangle", "Line", "Freehand", "Eraser", "Configure"};
@@ -11,7 +18,7 @@ boolean[] boxHover = new boolean[NUM_BOXES];
 
 // Shapes to be drawn
 Shape[] shapes = {
-    new Square(0, 0, 5, false, color(255), color(0)),
+    new Square(0, 0, 50, false, color(255), color(0)),
     new Triangle(0, 0, 0, 0, 0, 0, false, color(255), color(0)),
     new Line(0, 0, 0, 0, color(0))
 };
@@ -35,7 +42,6 @@ int[] triangleY = new int[3];
 ArrayList<Tool> drawnShapes = new ArrayList<Tool>();
 
 void setup() {
-    // Set window size
     size(1280, 720);
     surface.setResizable(true);
 
@@ -45,18 +51,35 @@ void setup() {
         boxHover[i] = false;
     }
 
+    // Initialize config values
+    if (currentTool instanceof Shape) {
+        Shape shape = (Shape)currentTool;
+        fillR = red(shape.innerColor);
+        fillG = green(shape.innerColor);
+        fillB = blue(shape.innerColor);
+        strokeR = red(shape.strokeColor);
+        strokeG = green(shape.strokeColor);
+        strokeB = blue(shape.strokeColor);
+        filled = shape.filled;
+    }
+
     noStroke();
     textAlign(CENTER, CENTER);
 }
 
 void draw() {
     background(255);
-
+    
     // Draw options boxes
     drawBoxes();
     
-    // Draw canvas area
-    drawCanvas();
+    // Draw config panel if needed
+    drawConfigPanel();
+    
+    // Draw canvas area (adjust for config panel height)
+    float canvasTop = BOX_HEIGHT + (showConfigPanel ? configPanelHeight : 0);
+    fill(255);
+    rect(0, canvasTop, width, height - canvasTop);
     
     // Draw all shapes
     for (Tool shape : drawnShapes) {
@@ -82,7 +105,14 @@ void mousePressed() {
         if (boxIndex >= 0 && boxIndex < NUM_BOXES) {
             getBox(boxIndex);
         }
-    } else {
+    } 
+    // Check if mouse is in config panel
+    else if (showConfigPanel && mouseY < BOX_HEIGHT + configPanelHeight) {
+        // Let config panel handle the click
+        return;
+    }
+    // Otherwise use the tool
+    else {
         useTool();
     }
 }
@@ -93,45 +123,60 @@ void getBox(int boxIndex) {
             currentTool = shapes[0];
             lineFirstClick = true;
             trianglePointsSet = 0;
+            showConfigPanel = true;
             break;
         case 1: // Triangle
             currentTool = shapes[1];
             lineFirstClick = true;
             trianglePointsSet = 0;
+            showConfigPanel = true;
             break;
         case 2: // Line
             currentTool = shapes[2];
             lineFirstClick = true;
             trianglePointsSet = 0;
+            showConfigPanel = true;
             break;
         case 3: // Freehand
             currentTool = freehand;
             lineFirstClick = true;
             trianglePointsSet = 0;
+            showConfigPanel = false;
             break;
         case 4: // Eraser
             currentTool = eraser;
             lineFirstClick = true;
             trianglePointsSet = 0;
+            showConfigPanel = false;
             break;
-        case 5: // Configure
+        case 5: // Configure (toggle panel for supported tools)
             if (currentTool instanceof Shape) {
-                // Close existing config window if open
-                if (configWindow != null && configWindow.isOpen) {
-                   configWindow.exit(); // Properly close the window
-                }
-                // Create new config window
-                configWindow = new ConfigWindow((Shape)currentTool);
-                PApplet.runSketch(new String[]{"Config"}, configWindow);
+                showConfigPanel = !showConfigPanel;
             }
             break;
+    }
+    
+    // Update config values when switching tools
+    if (currentTool instanceof Shape) {
+        Shape shape = (Shape)currentTool;
+        fillR = red(shape.innerColor);
+        fillG = green(shape.innerColor);
+        fillB = blue(shape.innerColor);
+        strokeR = red(shape.strokeColor);
+        strokeG = green(shape.strokeColor);
+        strokeB = blue(shape.strokeColor);
+        filled = shape.filled;
+        
+        if (currentTool instanceof Square) {
+            sizeValue = ((Square)currentTool).size;
+        }
     }
 }
 
 void useTool() {
     switch (currentTool.getType()) {
         case "Square":
-            Square square = new Square(mouseX, mouseY, 50, true, color(255, 0, 0), color(0));
+            Square square = new Square(mouseX, mouseY, sizeValue, filled, color(fillR, fillG, fillB), color(strokeR, strokeG, strokeB));
             drawnShapes.add(square);
             break;
         case "Triangle":
@@ -145,7 +190,7 @@ void useTool() {
                         triangleX[0], triangleY[0],
                         triangleX[1], triangleY[1],
                         triangleX[2], triangleY[2],
-                        true, color(0, 255, 0), color(0));
+                        filled, color(fillR, fillG, fillB), color(strokeR, strokeG, strokeB));
                     drawnShapes.add(triangle);
                     trianglePointsSet = 0;
                 }
@@ -157,7 +202,7 @@ void useTool() {
                 lineStartY = mouseY;
                 lineFirstClick = false;
             } else {
-                Line line = new Line(lineStartX, lineStartY, mouseX, mouseY, color(0));
+                Line line = new Line(lineStartX, lineStartY, mouseX, mouseY, color(strokeR, strokeG, strokeB));
                 drawnShapes.add(line);
                 lineFirstClick = true;
             }
@@ -178,7 +223,7 @@ void useTool() {
 }
 
 void mouseDragged() {
-    if (mouseY >= BOX_HEIGHT) {
+    if (mouseY >= BOX_HEIGHT + (showConfigPanel ? configPanelHeight : 0)) {
         switch (currentTool.getType()) {
             case "Freehand":
                 ((Freehand) currentTool).addPoint(mouseX, mouseY);
@@ -226,13 +271,105 @@ void drawBoxes() {
     noStroke();
 }
 
-void drawCanvas() {
+void drawConfigPanel() {
+    if (!showConfigPanel) return;
+    
+    fill(220);
+    stroke(150);
+    rect(0, BOX_HEIGHT, width, configPanelHeight);
+    
+    fill(0);
+    textAlign(LEFT, TOP);
+    text("Fill Color (R,G,B):", 20, BOX_HEIGHT + 10);
+    text("Stroke Color (R,G,B):", 20, BOX_HEIGHT + 40);
+    
+    // Fill color inputs
+    fillR = numberInput(180, BOX_HEIGHT + 10, fillR, 0, 255);
+    fillG = numberInput(230, BOX_HEIGHT + 10, fillG, 0, 255);
+    fillB = numberInput(280, BOX_HEIGHT + 10, fillB, 0, 255);
+    
+    // Stroke color inputs
+    strokeR = numberInput(180, BOX_HEIGHT + 40, strokeR, 0, 255);
+    strokeG = numberInput(230, BOX_HEIGHT + 40, strokeG, 0, 255);
+    strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
+    
+    // Filled checkbox
+    filled = checkbox(350, BOX_HEIGHT + 10, "Filled", filled);
+    
+    // Size slider (only for Square)
+    if (currentTool instanceof Square) {
+        text("Size:", 350, BOX_HEIGHT + 40);
+        sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
+    }
+    
+    // Update the current tool's properties
+    if (currentTool instanceof Shape) {
+        Shape shape = (Shape)currentTool;
+        shape.innerColor = color(fillR, fillG, fillB);
+        shape.strokeColor = color(strokeR, strokeG, strokeB);
+        shape.filled = filled;
+        
+        if (currentTool instanceof Square) {
+            ((Square)currentTool).size = sizeValue;
+        }
+    }
+}
+
+float numberInput(float x, float y, float value, float min, float max) {
     fill(255);
-    rect(0, BOX_HEIGHT, width, height - BOX_HEIGHT);
+    stroke(0);
+    rect(x, y, 40, 20);
+    fill(0);
+    textAlign(CENTER, CENTER);
+    text(nf(value, 0, 0), x + 20, y + 10);
+    
+    // Check if clicked
+    if (mousePressed && mouseX >= x && mouseX <= x + 40 && mouseY >= y && mouseY <= y + 20) {
+        String input = JOptionPane.showInputDialog("Enter new value (" + min + "-" + max + "):");
+        try {
+            float newValue = Float.parseFloat(input);
+            return constrain(newValue, min, max);
+        } catch (Exception e) {
+            return value;
+        }
+    }
+    return value;
+}
+
+float slider(float x, float y, float value, float min, float max) {
+    float sliderWidth = 200;
+    float sliderPos = map(value, min, max, x, x + sliderWidth);
+    
+    stroke(0);
+    line(x, y, x + sliderWidth, y);
+    fill(100);
+    ellipse(sliderPos, y, 10, 10);
+    
+    if (mousePressed && dist(mouseX, mouseY, sliderPos, y) < 10) {
+        return constrain(map(mouseX, x, x + sliderWidth, min, max), min, max);
+    }
+    return value;
+}
+
+boolean checkbox(float x, float y, String label, boolean checked) {
+    fill(255);
+    stroke(0);
+    rect(x, y, 15, 15);
+    if (checked) {
+        line(x, y, x+15, y+15);
+        line(x+15, y, x, y+15);
+    }
+    fill(0);
+    text(label, x + 25, y + 10);
+    
+    if (mouseX > x && mouseX < x+15 && mouseY > y && mouseY < y+15 && mousePressed) {
+        return !checked;
+    }
+    return checked;
 }
 
 void mouseMoved() {
-    // Update hover states
+    // Update hover states for tool boxes
     if (mouseY < BOX_HEIGHT) {
         for (int i = 0; i < NUM_BOXES; i++) {
             float boxWidth = width / float(NUM_BOXES);
@@ -247,11 +384,4 @@ void mouseMoved() {
 
 float getBrightness(color c) {
     return (red(c) + green(c) + blue(c)) / 3.0;
-}
-
-void exit() {
-    if (configWindow != null && configWindow.isOpen) {
-        configWindow.exit();
-    }
-    super.exit();
 }
