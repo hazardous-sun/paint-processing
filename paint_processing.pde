@@ -133,12 +133,12 @@ void mousePressed() {
             getBox(boxIndex);
         }
     } 
-    // Check if mouse is in config panel
+    // Check if mouse is in the config panel
     else if (showConfigPanel && mouseY < BOX_HEIGHT + configPanelHeight) {
         // Let config panel handle the click
         return;
     }
-    // Otherwise use the tool
+    // Otherwise, use the tool
     else {
         useTool();
     }

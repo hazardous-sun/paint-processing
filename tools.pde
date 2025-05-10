@@ -30,21 +30,21 @@ class Square extends Shape {
     }
   
     void display() {
-        // Desenhar o contorno com a espessura definida pelo usuário
+        // Draw the outline
         stroke(strokeColor);
         strokeWeight(strokeWeight);
         noFill();
-        line(x, y, x + size, y); // Topo
-        line(x + size, y, x + size, y + size); // Direita
-        line(x + size, y + size, x, y + size); // Base
-        line(x, y + size, x, y); // Esquerda
+        line(x, y, x + size, y); // Top
+        line(x + size, y, x + size, y + size); // Right
+        line(x + size, y + size, x, y + size); // Bottom
+        line(x, y + size, x, y); // Left
 
-        // Preenchimento com strokeWeight fixo em 1
+        // Fill the shape
         if (filled) {
             stroke(innerColor);
-            strokeWeight(1); // Linhas finas para preenchimento
+            strokeWeight(1);
             for (int i = 0; i < size; i++) {
-                // Linhas horizontais dentro do quadrado
+                
                 line(x, y + i, x + size, y + i);
             }
         }
@@ -67,31 +67,30 @@ class Triangle extends Shape {
     }
 
     void display() {
-        // Desenhar o contorno com a espessura definida pelo usuário
+        // Draw the outline
         stroke(strokeColor);
         strokeWeight(strokeWeight);
         noFill();
-        line(x, y, x2, y2); // Aresta 1
-        line(x2, y2, x3, y3); // Aresta 2
-        line(x3, y3, x, y); // Aresta 3
+        line(x, y, x2, y2);
+        line(x2, y2, x3, y3);
+        line(x3, y3, x, y);
 
-        // Preenchimento com strokeWeight fixo em 1
+        // Fill the shape
         if (filled) {
             stroke(innerColor);
-            strokeWeight(1); // Linhas finas para preenchimento
+            strokeWeight(1);
 
-            // Encontrar os limites verticais do triângulo
+            // We need to find the limits of the triangle in order to properly fill it
             int minY = min(y, min(y2, y3));
             int maxY = max(y, max(y2, y3));
 
-            // Scanline para preenchimento
+            // Scanline for filling the triangle
             for (int py = minY; py <= maxY; py++) {
                 ArrayList<Integer> intersections = new ArrayList<Integer>();
                 addIntersection(x, y, x2, y2, py, intersections);
                 addIntersection(x2, y2, x3, y3, py, intersections);
                 addIntersection(x3, y3, x, y, py, intersections);
 
-                // Desenhar linhas horizontais entre as interseções
                 if (intersections.size() >= 2) {
                     intersections.sort(null);
                     int startX = intersections.get(0);
@@ -102,10 +101,9 @@ class Triangle extends Shape {
         }
     }
 
-    // Método auxiliar para calcular interseções
     void addIntersection(int x1, int y1, int x2, int y2, int py, ArrayList<Integer> intersections) {
         if ((y1 <= py && y2 >= py) || (y1 >= py && y2 <= py)) {
-            if (y1 != y2) { // Evitar divisão por zero
+            if (y1 != y2) {
                 int px = (int)(x1 + (float)(py - y1) * (x2 - x1) / (y2 - y1));
                 intersections.add(px);
             }
@@ -128,40 +126,37 @@ class Star extends Shape {
     }
 
     void display() {
-        // Desenhar o contorno com a espessura definida pelo usuário
+        // Draw the outline
         stroke(strokeColor);
         strokeWeight(strokeWeight);
         noFill();
 
-        // Calcular os vértices da estrela (5 pontas)
-        float angle = TWO_PI / 5; // 5 vértices externos
+        // Calculate the start vertices
+        float angle = TWO_PI / 5;
         float halfAngle = angle / 2;
 
-        // Arrays para armazenar os pontos
         float[] outerPointsX = new float[5];
         float[] outerPointsY = new float[5];
         float[] innerPointsX = new float[5];
         float[] innerPointsY = new float[5];
 
-        // Calcular pontos externos e internos
+        // Calculate the internal and external points
         for (int i = 0; i < 5; i++) {
-            // Pontos externos
             outerPointsX[i] = x + cos(angle * i - HALF_PI) * outerRadius;
             outerPointsY[i] = y + sin(angle * i - HALF_PI) * outerRadius;
             
-            // Pontos internos (entre os vértices externos)
             innerPointsX[i] = x + cos(angle * i - HALF_PI + halfAngle) * innerRadius;
             innerPointsY[i] = y + sin(angle * i - HALF_PI + halfAngle) * innerRadius;
         }
 
-        // Desenhar o contorno da estrela
+        // Draw the outline
         for (int i = 0; i < 5; i++) {
             int next = (i + 1) % 5;
             line(outerPointsX[i], outerPointsY[i], innerPointsX[i], innerPointsY[i]); // Linha para dentro
             line(innerPointsX[i], innerPointsY[i], outerPointsX[next], outerPointsY[next]); // Linha para fora
         }
 
-        // Preenchimento com strokeWeight fixo em 1
+        // Fill the shape
         if (filled) {
             stroke(innerColor);
             strokeWeight(1); // Linhas finas para preenchimento
@@ -174,16 +169,16 @@ class Star extends Shape {
             for (int py = minY; py <= maxY; py++) {
                 ArrayList<Float> intersections = new ArrayList<Float>();
 
-                // Calcular interseções com todas as arestas
+                // Calculate intersections with all edges
                 for (int i = 0; i < 5; i++) {
                     int next = (i + 1) % 5;
-                    // Aresta externa -> interna
+                    // External edge -> internal
                     addIntersection(outerPointsX[i], outerPointsY[i], innerPointsX[i], innerPointsY[i], py, intersections);
-                    // Aresta interna -> externa (próximo vértice)
+                    // Internal edge -> external (next vertex)
                     addIntersection(innerPointsX[i], innerPointsY[i], outerPointsX[next], outerPointsY[next], py, intersections);
                 }
 
-                // Ordenar interseções e desenhar linhas entre pares
+                // Order the instersections and draw lines between the pairs
                 if (intersections.size() >= 2) {
                     intersections.sort(null);
                     for (int i = 0; i < intersections.size(); i += 2) {
@@ -196,7 +191,6 @@ class Star extends Shape {
         }
     }
 
-    // Método auxiliar para calcular interseções
     void addIntersection(float x1, float y1, float x2, float y2, int py, ArrayList<Float> intersections) {
         if ((y1 <= py && y2 >= py) || (y1 >= py && y2 <= py)) {
             if (y1 != y2) { // Evitar divisão por zero
@@ -223,7 +217,7 @@ class Line extends Shape {
     void display() {
         stroke(strokeColor);
         strokeWeight(strokeWeight);
-        line(x, y, x2, y2); // Já usa line()!
+        line(x, y, x2, y2);
     }
 
     String getType() {
@@ -294,15 +288,14 @@ class Eraser extends Freehand {
     }
 
     void display() {
-        stroke(255); // Sempre branco (simula borracha)
+        stroke(255);
         strokeWeight(strokeWeight);
         noFill();
         
-        // Mesma lógica do Freehand, mas com cor fixa
         for (int i = 0; i < points.size() - 1; i++) {
             PVector p1 = points.get(i);
             PVector p2 = points.get(i + 1);
-            line(p1.x, p1.y, p2.x, p2.y); // Usa apenas line()!
+            line(p1.x, p1.y, p2.x, p2.y);
         }
     }
     
