@@ -366,7 +366,7 @@ void drawConfigPanel() {
     
     // Common options for all tools
     text("Stroke Weight:", 20, BOX_HEIGHT + 70);
-    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 255);
+    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 20);
     fill(0);
     text(nf(strokeWeightValue, 1, 1), 400, BOX_HEIGHT + 70);
     
