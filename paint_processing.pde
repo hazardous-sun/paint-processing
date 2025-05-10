@@ -130,6 +130,8 @@ void mousePressed() {
     if (mouseY < BOX_HEIGHT) {
         int boxIndex = (int)(mouseX / (width / float(NUM_BOXES)));
         if (boxIndex >= 0 && boxIndex < NUM_BOXES) {
+            // Reset stroke weight before switching tools
+            strokeWeight(1);
             getBox(boxIndex);
         }
     } 
@@ -296,13 +298,12 @@ void mouseReleased() {
 }
 
 void drawBoxes() {
-    stroke(0);
-    strokeWeight(3);
+    noStroke();
+    
     for (int i = 0; i < NUM_BOXES; i++) {
         float boxWidth = width / float(NUM_BOXES);
         float x = i * boxWidth;
         
-        // Change color slightly when hovered
         if (boxHover[i]) {
             fill(getBrightness(boxColors[i]) > 128 ? boxColors[i] - 30 : boxColors[i] + 30);
         } else {
@@ -311,8 +312,11 @@ void drawBoxes() {
         
         rect(x, 0, boxWidth, BOX_HEIGHT);
         
-        // Add label
+        // Draw text with consistent formatting
+        noStroke(); // Remove stroke for text
+        textSize(12); // Explicit text size
         fill(getBrightness(boxColors[i]) > 128 ? 0 : 255);
+        textAlign(CENTER, CENTER);
         text(boxNames[i], x + boxWidth/2, BOX_HEIGHT/2);
     }
     noStroke();
