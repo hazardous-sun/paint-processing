@@ -270,11 +270,13 @@ class Freehand extends Tool {
         stroke(strokeColor);
         strokeWeight(strokeWeight);
         noFill();
-        beginShape();
-        for (PVector point : points) {
-            vertex(point.x, point.y);
+        
+        
+        for (int i = 0; i < points.size() - 1; i++) {
+            PVector p1 = points.get(i);
+            PVector p2 = points.get(i + 1);
+            line(p1.x, p1.y, p2.x, p2.y);
         }
-        endShape();
     }
     
     String getType() {
@@ -289,6 +291,19 @@ class Eraser extends Freehand {
 
     Eraser(Eraser other) {
         super(other);
+    }
+
+    void display() {
+        stroke(255); // Sempre branco (simula borracha)
+        strokeWeight(strokeWeight);
+        noFill();
+        
+        // Mesma lógica do Freehand, mas com cor fixa
+        for (int i = 0; i < points.size() - 1; i++) {
+            PVector p1 = points.get(i);
+            PVector p2 = points.get(i + 1);
+            line(p1.x, p1.y, p2.x, p2.y); // Usa apenas line()!
+        }
     }
     
     String getType() {
