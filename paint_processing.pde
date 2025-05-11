@@ -2,7 +2,7 @@ import processing.awt.PSurfaceAWT;
 import javax.swing.*;
 
 // Tool configuration variables
-boolean showConfigPanel = true; // Always show by default
+boolean showConfigPanel = true;
 float fillR = 0, fillG = 0, fillB = 0;
 float strokeR = 0, strokeG = 0, strokeB = 0;
 boolean filled = true;
@@ -32,7 +32,7 @@ int starSize = 30;
 
 // Freehand and Eraser tools
 Freehand freehand = new Freehand(color(0), 1);
-Eraser eraser = new Eraser(10); // Eraser has thicker default stroke
+Eraser eraser = new Eraser(10);
 
 // Currently selected tool
 Tool currentTool = shapes[0];
@@ -320,8 +320,8 @@ void drawBoxes() {
         rect(x, 0, boxWidth, BOX_HEIGHT);
         
         // Draw text with consistent formatting
-        noStroke(); // Remove stroke for text
-        textSize(12); // Explicit text size
+        noStroke();
+        textSize(12);
         fill(getBrightness(boxColors[i]) > 128 ? 0 : 255);
         textAlign(CENTER, CENTER);
         text(boxNames[i], x + boxWidth/2, BOX_HEIGHT/2);

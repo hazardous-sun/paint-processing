@@ -171,16 +171,16 @@ class Star extends Shape {
         // Draw the outline
         for (int i = 0; i < 5; i++) {
             int next = (i + 1) % 5;
-            line(outerPointsX[i], outerPointsY[i], innerPointsX[i], innerPointsY[i]); // Linha para dentro
-            line(innerPointsX[i], innerPointsY[i], outerPointsX[next], outerPointsY[next]); // Linha para fora
+            line(outerPointsX[i], outerPointsY[i], innerPointsX[i], innerPointsY[i]);
+            line(innerPointsX[i], innerPointsY[i], outerPointsX[next], outerPointsY[next]);
         }
 
         // Fill the shape
         if (filled) {
             stroke(innerColor);
-            strokeWeight(1); // Linhas finas para preenchimento
+            strokeWeight(1);
 
-            // Encontrar os limites da estrela
+            // Finding star limits
             int minY = (int)(y - outerRadius);
             int maxY = (int)(y + outerRadius);
 
@@ -212,7 +212,7 @@ class Star extends Shape {
 
     void addIntersection(float x1, float y1, float x2, float y2, int py, ArrayList<Float> intersections) {
         if ((y1 <= py && y2 >= py) || (y1 >= py && y2 <= py)) {
-            if (y1 != y2) { // Evitar divisão por zero
+            if (y1 != y2) { // Avoid dividing by zero
                 float px = x1 + (py - y1) * (x2 - x1) / (y2 - y1);
                 intersections.add(px);
             }
