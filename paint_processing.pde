@@ -9,6 +9,8 @@ boolean filled = true;
 int sizeValue = 50;
 float strokeWeightValue = 1;
 int configPanelHeight = 120;
+boolean numberInputActive = false;
+boolean prevMousePressed = false;
 
 // Box settings
 String[] boxNames = {"Square", "Triangle", "Line", "Star", "Freehand", "Eraser", "Configure"};
@@ -88,7 +90,7 @@ void setup() {
 void draw() {
     background(255);
     
-    // Draw canvas area (adjust for config panel height)
+    // Draw canvas area
     float canvasTop = BOX_HEIGHT + (showConfigPanel ? configPanelHeight : 0);
     fill(255);
     rect(0, canvasTop, width, height - canvasTop);
@@ -115,6 +117,12 @@ void draw() {
     // Draw config panel if needed
     if (showConfigPanel) {
         drawConfigPanel();
+    }
+    
+    // Update mouse state tracking
+    prevMousePressed = mousePressed;
+    if (!mousePressed) {
+        numberInputActive = false; // Reset when mouse is released
     }
 }
 
@@ -363,14 +371,18 @@ float numberInput(float x, float y, float value, float min, float max) {
     textAlign(CENTER, CENTER);
     text(nf(value, 0, 0), x + 20, y + 10);
     
-    // Check if clicked
-    if (mousePressed && mouseX >= x && mouseX <= x + 40 && mouseY >= y && mouseY <= y + 20) {
+    // Check for NEW mouse press that isn't already handling an input
+    if (!numberInputActive && mousePressed && !prevMousePressed && 
+        mouseX >= x && mouseX <= x + 40 && 
+        mouseY >= y && mouseY <= y + 20) {
+        
         String input = JOptionPane.showInputDialog("Enter new value (" + min + "-" + max + "):");
         try {
             float newValue = Float.parseFloat(input);
-            return constrain(newValue, min, max);
+            value = constrain(newValue, min, max);
+            numberInputActive = true; // Prevent multiple triggers
         } catch (Exception e) {
-            return value;
+            // Invalid input, keep current value
         }
     }
     return value;
