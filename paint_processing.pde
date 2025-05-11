@@ -334,64 +334,66 @@ void drawConfigPanel() {
     
     // Reset all drawing styles before rendering UI
     pushStyle();
-    stroke(150); // Panel border color
-    strokeWeight(1); // Ensure thin stroke for UI
-    fill(220); // Panel background color
+    stroke(150);
+    strokeWeight(1);
+    fill(220);
     rect(0, BOX_HEIGHT, width, configPanelHeight);
     
-    fill(0); // Default text color
-    textAlign(LEFT, TOP);
-    noStroke(); // No stroke for text elements
+    // Set consistent text styling
+    fill(0);
+    textAlign(LEFT, CENTER);
+    noStroke();
+
+    // Define consistent row positions
+    float row1Y = BOX_HEIGHT + 25;
+    float row2Y = BOX_HEIGHT + 55;
+    float row3Y = BOX_HEIGHT + 85;
 
     // Common options for all tools
-    text("Stroke Weight:", 20, BOX_HEIGHT + 70);
-    strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 20);
-    fill(0);
-    text(nf(strokeWeightValue, 1, 1), 400, BOX_HEIGHT + 70);
+    text("Stroke Weight:", 20, row3Y);
+    strokeWeightValue = slider(180, row3Y, strokeWeightValue, 1, 20);
+    text(nf(strokeWeightValue, 1, 1), 400, row3Y);
 
     // Tool-specific options
     if (currentTool instanceof Shape) {
         if (!(currentTool instanceof Line)) {
-        text("Fill Color (R,G,B):", 20, BOX_HEIGHT + 10);
-        fillR = numberInput(180, BOX_HEIGHT + 10, fillR, 0, 255);
-        fillG = numberInput(230, BOX_HEIGHT + 10, fillG, 0, 255);
-        fillB = numberInput(280, BOX_HEIGHT + 10, fillB, 0, 255);
+            text("Fill Color (R,G,B):", 20, row1Y);
+            fillR = numberInput(180, row1Y, fillR, 0, 255);
+            fillG = numberInput(230, row1Y, fillG, 0, 255);
+            fillB = numberInput(280, row1Y, fillB, 0, 255);
+            
+            // Fixed checkbox positioning
+            filled = checkbox(350, row1Y - 8, "Filled", filled);
         }
         
-        text("Stroke Color (R,G,B):", 20, BOX_HEIGHT + 40);
-        strokeR = numberInput(180, BOX_HEIGHT + 40, strokeR, 0, 255);
-        strokeG = numberInput(230, BOX_HEIGHT + 40, strokeG, 0, 255);
-        strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
-        
-        if (!(currentTool instanceof Line)) {
-        filled = checkbox(350, BOX_HEIGHT + 10, "Filled", filled);
-        }
+        // Corrected and properly aligned stroke color label
+        text("Stroke Color (R,G,B):", 20, row2Y);
+        strokeR = numberInput(180, row2Y, strokeR, 0, 255);
+        strokeG = numberInput(230, row2Y, strokeG, 0, 255);
+        strokeB = numberInput(280, row2Y, strokeB, 0, 255);
         
         if (currentTool instanceof Square || currentTool instanceof Star) {
-        text("Size:", 350, BOX_HEIGHT + 40);
-        if (currentTool instanceof Square) {
-            sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
-        } else {
-            starSize = (int)slider(400, BOX_HEIGHT + 40, starSize, 10, 200);
-            starOuterRadius = starSize;
-            starInnerRadius = starSize/2;
-        }
+            text("Size:", 350, row2Y);
+            if (currentTool instanceof Square) {
+                sizeValue = (int)slider(400, row2Y, sizeValue, 10, 200);
+            } else {
+                starSize = (int)slider(400, row2Y, starSize, 10, 200);
+                starOuterRadius = starSize;
+                starInnerRadius = starSize/2;
+            }
         }
     } 
     else if (currentTool instanceof Freehand && !(currentTool instanceof Eraser)) {
-        text("Line Color (R,G,B):", 20, BOX_HEIGHT + 10);
-        strokeR = numberInput(180, BOX_HEIGHT + 10, strokeR, 0, 255);
-        strokeG = numberInput(230, BOX_HEIGHT + 10, strokeG, 0, 255);
-        strokeB = numberInput(280, BOX_HEIGHT + 10, strokeB, 0, 255);
+        text("Line Color (R,G,B):", 20, row1Y);
+        strokeR = numberInput(180, row1Y, strokeR, 0, 255);
+        strokeG = numberInput(230, row1Y, strokeG, 0, 255);
+        strokeB = numberInput(280, row1Y, strokeB, 0, 255);
     }
     else if (currentTool instanceof Eraser) {
-        text("Eraser Size:", 20, BOX_HEIGHT + 10);
-        // No color options for eraser
+        text("Eraser Size:", 20, row1Y);
     }
 
-    popStyle(); // Restore original styles
-    
-    // Update tool properties (outside of style scope)
+    popStyle();
     updateToolProperties();
 }
 
@@ -470,11 +472,8 @@ boolean checkbox(float x, float y, String label, boolean checked) {
         line(x+15, y, x, y+15);
     }
     fill(0);
-    text(label, x + 25, y + 10);
-    
-    if (mouseX > x && mouseX < x+15 && mouseY > y && mouseY < y+15 && mousePressed) {
-        return !checked;
-    }
+    textAlign(LEFT, CENTER);
+    text(label, x + 20, y + 7.5);
     return checked;
 }
 
