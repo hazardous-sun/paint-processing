@@ -28,6 +28,11 @@ class Square extends Shape {
         super(x, y, filled, innerColor, strokeColor, strokeWeight);
         this.size = size;
     }
+
+    Square(Square other) {
+        super(other.x, other.y, other.filled, other.innerColor, other.strokeColor, other.strokeWeight);
+        this.size = other.size;
+    }
   
     void display() {
         // Draw the outline
@@ -64,6 +69,14 @@ class Triangle extends Shape {
         this.y2 = y2;
         this.x3 = x3;
         this.y3 = y3;
+    }
+
+    Triangle(Triangle other) {
+        super(other.x, other.y, other.filled, other.innerColor, other.strokeColor, other.strokeWeight);
+        this.x2 = other.x2;
+        this.y2 = other.y2;
+        this.x3 = other.x3;
+        this.y3 = other.y3;
     }
 
     void display() {
@@ -123,6 +136,12 @@ class Star extends Shape {
         super(x, y, filled, innerColor, strokeColor, strokeWeight);
         this.outerRadius = size;
         this.innerRadius = size / 2;
+    }
+
+    Star(Star other) {
+        super(other.x, other.y, other.filled, other.innerColor, other.strokeColor, other.strokeWeight);
+        this.outerRadius = other.outerRadius;
+        this.innerRadius = other.innerRadius;
     }
 
     void display() {
@@ -212,6 +231,12 @@ class Line extends Shape {
         super(x1, y1, false, color(0), strokeColor, strokeWeight);
         this.x2 = x2;
         this.y2 = y2;
+    }
+
+    Line(Line other) {
+        super(other.x, other.y, other.filled, other.innerColor, other.strokeColor, other.strokeWeight);
+        this.x2 = other.x2;
+        this.y2 = other.y2;
     }
 
     void display() {

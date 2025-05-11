@@ -49,6 +49,10 @@ int[] triangleY = new int[3];
 // List of all drawn shapes
 ArrayList<Tool> drawnShapes = new ArrayList<Tool>();
 
+// Undo/Redo stacks
+ArrayList<ArrayList<Tool>> undoStack = new ArrayList<ArrayList<Tool>>();
+ArrayList<ArrayList<Tool>> redoStack = new ArrayList<ArrayList<Tool>>();
+
 void setup() {
     size(1280, 720);
     surface.setResizable(true);
@@ -199,6 +203,7 @@ void useTool() {
                                     color(fillR, fillG, fillB), 
                                     color(strokeR, strokeG, strokeB), 
                                     strokeWeightValue);
+            saveStateForUndo();
             drawnShapes.add(square);
             break;
         case "Triangle":
@@ -218,6 +223,7 @@ void useTool() {
                         strokeWeightValue);
                     drawnShapes.add(triangle);
                     trianglePointsSet = 0;
+                    saveStateForUndo();
                 }
             }
             break;
@@ -232,6 +238,7 @@ void useTool() {
                                    strokeWeightValue);
                 drawnShapes.add(line);
                 lineFirstClick = true;
+                saveStateForUndo();
             }
             break;
         case "Star":
@@ -240,6 +247,7 @@ void useTool() {
                             color(strokeR, strokeG, strokeB),
                             strokeWeightValue);
             drawnShapes.add(star);
+            saveStateForUndo();
             break;
         case "Freehand":
             Freehand fh = (Freehand) currentTool;
@@ -276,23 +284,22 @@ void mouseReleased() {
     switch (currentTool.getType()) {
         case "Freehand":
             freehand.stopDrawing();
-            // Create a NEW Freehand object with current properties
             Freehand newFreehand = new Freehand(color(strokeR, strokeG, strokeB), strokeWeightValue);
             newFreehand.points = new ArrayList<PVector>(freehand.points);
             drawnShapes.add(newFreehand);
-            // Reset the active freehand tool
             freehand = new Freehand(color(strokeR, strokeG, strokeB), strokeWeightValue);
             currentTool = freehand;
+            saveStateForUndo();
             break;
+            
         case "Eraser":
             eraser.stopDrawing();
-            // Create a NEW Eraser object with current properties
             Eraser newEraser = new Eraser(strokeWeightValue);
             newEraser.points = new ArrayList<PVector>(eraser.points);
             drawnShapes.add(newEraser);
-            // Reset the active eraser tool
             eraser = new Eraser(strokeWeightValue);
             currentTool = eraser;
+            saveStateForUndo();
             break;
     }
 }
@@ -487,4 +494,106 @@ void mouseMoved() {
 
 float getBrightness(color c) {
     return (red(c) + green(c) + blue(c)) / 3.0;
+}
+
+void saveStateForUndo() {
+    ArrayList<Tool> stateCopy = new ArrayList<Tool>();
+    for (Tool tool : drawnShapes) {
+        if (tool instanceof Square) {
+            stateCopy.add(new Square((Square)tool));
+        } 
+        else if (tool instanceof Triangle) {
+            stateCopy.add(new Triangle((Triangle)tool));
+        }
+        else if (tool instanceof Line) {
+            stateCopy.add(new Line((Line)tool));
+        }
+        else if (tool instanceof Star) {
+            stateCopy.add(new Star((Star)tool));
+        }
+        else if (tool instanceof Freehand) {
+            stateCopy.add(new Freehand((Freehand)tool));
+        }
+        else if (tool instanceof Eraser) {
+            stateCopy.add(new Eraser((Eraser)tool));
+        }
+    }
+    
+    undoStack.add(stateCopy);
+    // Limit undo stack size to 20 in order to prevent memory issues
+    if (undoStack.size() > 20) {
+        undoStack.remove(0);
+    }
+    redoStack.clear();
+}
+
+void undo() {
+    if (!undoStack.isEmpty()) {
+        // Save current state to redo stack first
+        ArrayList<Tool> currentState = new ArrayList<Tool>();
+        for (Tool tool : drawnShapes) {
+            if (tool instanceof Square) {
+                currentState.add(new Square((Square)tool));
+            } 
+            else if (tool instanceof Triangle) {
+                currentState.add(new Triangle((Triangle)tool));
+            }
+            else if (tool instanceof Line) {
+                currentState.add(new Line((Line)tool));
+            }
+            else if (tool instanceof Star) {
+                currentState.add(new Star((Star)tool));
+            }
+            else if (tool instanceof Freehand) {
+                currentState.add(new Freehand((Freehand)tool));
+            }
+            else if (tool instanceof Eraser) {
+                currentState.add(new Eraser((Eraser)tool));
+            }
+        }
+        redoStack.add(currentState);
+        
+        // Restore previous state
+        drawnShapes = undoStack.remove(undoStack.size() - 1);
+    }
+}
+
+void redo() {
+    if (!redoStack.isEmpty()) {
+        // Save current state to undo stack first
+        ArrayList<Tool> currentState = new ArrayList<Tool>();
+        for (Tool tool : drawnShapes) {
+            if (tool instanceof Square) {
+                currentState.add(new Square((Square)tool));
+            } 
+            else if (tool instanceof Triangle) {
+                currentState.add(new Triangle((Triangle)tool));
+            }
+            else if (tool instanceof Line) {
+                currentState.add(new Line((Line)tool));
+            }
+            else if (tool instanceof Star) {
+                currentState.add(new Star((Star)tool));
+            }
+            else if (tool instanceof Freehand) {
+                currentState.add(new Freehand((Freehand)tool));
+            }
+            else if (tool instanceof Eraser) {
+                currentState.add(new Eraser((Eraser)tool));
+            }
+        }
+        undoStack.add(currentState);
+        
+        // Restore next state
+        drawnShapes = redoStack.remove(redoStack.size() - 1);
+    }
+}
+
+void keyPressed() {
+    if (key == 'z') {
+        undo();
+    } 
+    else if (key == 'y') {
+        redo();
+    }
 }
