@@ -362,11 +362,14 @@ void drawConfigPanel() {
             fillG = numberInput(230, row1Y, fillG, 0, 255);
             fillB = numberInput(280, row1Y, fillB, 0, 255);
             
-            // Fixed checkbox positioning
+            // Fixed checkbox positioning and functionality
+            if (mousePressed && mouseX >= 350 && mouseX <= 365 && mouseY >= row1Y - 8 && mouseY <= row1Y + 7) {
+                filled = !filled;
+                mousePressed = false; // Prevent multiple toggles
+            }
             filled = checkbox(350, row1Y - 8, "Filled", filled);
         }
         
-        // Corrected and properly aligned stroke color label
         text("Stroke Color (R,G,B):", 20, row2Y);
         strokeR = numberInput(180, row2Y, strokeR, 0, 255);
         strokeG = numberInput(230, row2Y, strokeG, 0, 255);
@@ -395,33 +398,31 @@ void drawConfigPanel() {
 }
 
 void updateToolProperties() {
-  if (currentTool instanceof Shape) {
-    Shape shape = (Shape)currentTool;
-    if (!(currentTool instanceof Line)) {
-      shape.innerColor = color(fillR, fillG, fillB);
+    if (currentTool instanceof Shape) {
+        Shape shape = (Shape)currentTool;
+        if (!(currentTool instanceof Line)) {
+            shape.innerColor = color(fillR, fillG, fillB);
+            shape.filled = filled; // Ensure filled state is updated
+        }
+        shape.strokeColor = color(strokeR, strokeG, strokeB);
+        shape.strokeWeight = strokeWeightValue;
+        
+        if (currentTool instanceof Square) {
+            ((Square)currentTool).size = sizeValue;
+        }
+        else if (currentTool instanceof Star) {
+            ((Star)currentTool).outerRadius = starOuterRadius;
+            ((Star)currentTool).innerRadius = starInnerRadius;
+        }
+    } 
+    else if (currentTool instanceof Freehand) {
+        Freehand fh = (Freehand)currentTool;
+        fh.strokeColor = color(strokeR, strokeG, strokeB);
+        fh.strokeWeight = strokeWeightValue;
+    } 
+    else if (currentTool instanceof Eraser) {
+        ((Eraser)currentTool).strokeWeight = strokeWeightValue;
     }
-    shape.strokeColor = color(strokeR, strokeG, strokeB);
-    if (!(currentTool instanceof Line)) {
-      shape.filled = filled;
-    }
-    shape.strokeWeight = strokeWeightValue;
-    
-    if (currentTool instanceof Square) {
-      ((Square)currentTool).size = sizeValue;
-    }
-    else if (currentTool instanceof Star) {
-      ((Star)currentTool).outerRadius = starOuterRadius;
-      ((Star)currentTool).innerRadius = starInnerRadius;
-    }
-  } 
-  else if (currentTool instanceof Freehand) {
-    Freehand fh = (Freehand)currentTool;
-    fh.strokeColor = color(strokeR, strokeG, strokeB);
-    fh.strokeWeight = strokeWeightValue;
-  } 
-  else if (currentTool instanceof Eraser) {
-    ((Eraser)currentTool).strokeWeight = strokeWeightValue;
-  }
 }
 
 float numberInput(float x, float y, float value, float min, float max) {
@@ -461,16 +462,22 @@ float slider(float x, float y, float value, float min, float max) {
 }
 
 boolean checkbox(float x, float y, String label, boolean checked) {
+    // Draw checkbox
     fill(255);
     stroke(0);
     rect(x, y, 15, 15);
+    
+    // Draw checkmark if checked
     if (checked) {
         line(x, y, x+15, y+15);
         line(x+15, y, x, y+15);
     }
+    
+    // Draw label
     fill(0);
     textAlign(LEFT, CENTER);
     text(label, x + 20, y + 7.5);
+    
     return checked;
 }
 
