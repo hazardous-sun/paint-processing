@@ -66,7 +66,6 @@ class Square extends Shape {
             stroke(innerColor);
             strokeWeight(1);
             for (int i = 0; i < size; i++) {
-                
                 line(x, y + i, x + size, y + i);
             }
         }
