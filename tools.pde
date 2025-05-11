@@ -288,6 +288,7 @@ class Eraser extends Freehand {
     }
 
     void display() {
+        pushStyle();
         stroke(255);
         strokeWeight(strokeWeight);
         noFill();
@@ -297,6 +298,7 @@ class Eraser extends Freehand {
             PVector p2 = points.get(i + 1);
             line(p1.x, p1.y, p2.x, p2.y);
         }
+        popStyle();
     }
     
     String getType() {

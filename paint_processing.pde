@@ -325,88 +325,97 @@ void drawBoxes() {
 void drawConfigPanel() {
     if (!showConfigPanel) return;
     
-    fill(220);
-    stroke(150);
+    // Reset all drawing styles before rendering UI
+    pushStyle();
+    stroke(150); // Panel border color
+    strokeWeight(1); // Ensure thin stroke for UI
+    fill(220); // Panel background color
     rect(0, BOX_HEIGHT, width, configPanelHeight);
     
-    fill(0);
+    fill(0); // Default text color
     textAlign(LEFT, TOP);
-    
+    noStroke(); // No stroke for text elements
+
     // Common options for all tools
     text("Stroke Weight:", 20, BOX_HEIGHT + 70);
     strokeWeightValue = slider(180, BOX_HEIGHT + 70, strokeWeightValue, 1, 20);
     fill(0);
     text(nf(strokeWeightValue, 1, 1), 400, BOX_HEIGHT + 70);
-    
-    // Different options for different tools
+
+    // Tool-specific options
     if (currentTool instanceof Shape) {
-        // Only show fill color if it's not a Line
         if (!(currentTool instanceof Line)) {
-            text("Fill Color (R,G,B):", 20, BOX_HEIGHT + 10);
-            fillR = numberInput(180, BOX_HEIGHT + 10, fillR, 0, 255);
-            fillG = numberInput(230, BOX_HEIGHT + 10, fillG, 0, 255);
-            fillB = numberInput(280, BOX_HEIGHT + 10, fillB, 0, 255);
+        text("Fill Color (R,G,B):", 20, BOX_HEIGHT + 10);
+        fillR = numberInput(180, BOX_HEIGHT + 10, fillR, 0, 255);
+        fillG = numberInput(230, BOX_HEIGHT + 10, fillG, 0, 255);
+        fillB = numberInput(280, BOX_HEIGHT + 10, fillB, 0, 255);
         }
         
-        // Always show stroke color for shapes
         text("Stroke Color (R,G,B):", 20, BOX_HEIGHT + 40);
         strokeR = numberInput(180, BOX_HEIGHT + 40, strokeR, 0, 255);
         strokeG = numberInput(230, BOX_HEIGHT + 40, strokeG, 0, 255);
         strokeB = numberInput(280, BOX_HEIGHT + 40, strokeB, 0, 255);
         
-        // Filled checkbox (only for fillable shapes)
         if (!(currentTool instanceof Line)) {
-            filled = checkbox(350, BOX_HEIGHT + 10, "Filled", filled);
+        filled = checkbox(350, BOX_HEIGHT + 10, "Filled", filled);
         }
         
-        // Size slider for Square and Star
         if (currentTool instanceof Square || currentTool instanceof Star) {
-            text("Size:", 350, BOX_HEIGHT + 40);
-            if (currentTool instanceof Square) {
-                sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
-            } else { // Star
-                starSize = (int)slider(400, BOX_HEIGHT + 40, starSize, 10, 200);
-                starOuterRadius = starSize;
-                starInnerRadius = starSize/2;
-            }
+        text("Size:", 350, BOX_HEIGHT + 40);
+        if (currentTool instanceof Square) {
+            sizeValue = (int)slider(400, BOX_HEIGHT + 40, sizeValue, 10, 200);
+        } else {
+            starSize = (int)slider(400, BOX_HEIGHT + 40, starSize, 10, 200);
+            starOuterRadius = starSize;
+            starInnerRadius = starSize/2;
+        }
         }
     } 
     else if (currentTool instanceof Freehand && !(currentTool instanceof Eraser)) {
-        // Only show line color for Freehand (not for Eraser)
         text("Line Color (R,G,B):", 20, BOX_HEIGHT + 10);
         strokeR = numberInput(180, BOX_HEIGHT + 10, strokeR, 0, 255);
         strokeG = numberInput(230, BOX_HEIGHT + 10, strokeG, 0, 255);
         strokeB = numberInput(280, BOX_HEIGHT + 10, strokeB, 0, 255);
     }
-    
-    // Update the current tool's properties
-    if (currentTool instanceof Shape) {
-        Shape shape = (Shape)currentTool;
-        if (!(currentTool instanceof Line)) {
-            shape.innerColor = color(fillR, fillG, fillB);
-        }
-        shape.strokeColor = color(strokeR, strokeG, strokeB);
-        if (!(currentTool instanceof Line)) {
-            shape.filled = filled;
-        }
-        shape.strokeWeight = strokeWeightValue;
-        
-        if (currentTool instanceof Square) {
-            ((Square)currentTool).size = sizeValue;
-        }
-        else if (currentTool instanceof Star) {
-            ((Star)currentTool).outerRadius = starOuterRadius;
-            ((Star)currentTool).innerRadius = starInnerRadius;
-        }
-    } 
-    else if (currentTool instanceof Freehand) {
-        Freehand fh = (Freehand)currentTool;
-        fh.strokeColor = color(strokeR, strokeG, strokeB);
-        fh.strokeWeight = strokeWeightValue;
-    } 
     else if (currentTool instanceof Eraser) {
-        ((Eraser)currentTool).strokeWeight = strokeWeightValue;
+        text("Eraser Size:", 20, BOX_HEIGHT + 10);
+        // No color options for eraser
     }
+
+    popStyle(); // Restore original styles
+    
+    // Update tool properties (outside of style scope)
+    updateToolProperties();
+}
+
+void updateToolProperties() {
+  if (currentTool instanceof Shape) {
+    Shape shape = (Shape)currentTool;
+    if (!(currentTool instanceof Line)) {
+      shape.innerColor = color(fillR, fillG, fillB);
+    }
+    shape.strokeColor = color(strokeR, strokeG, strokeB);
+    if (!(currentTool instanceof Line)) {
+      shape.filled = filled;
+    }
+    shape.strokeWeight = strokeWeightValue;
+    
+    if (currentTool instanceof Square) {
+      ((Square)currentTool).size = sizeValue;
+    }
+    else if (currentTool instanceof Star) {
+      ((Star)currentTool).outerRadius = starOuterRadius;
+      ((Star)currentTool).innerRadius = starInnerRadius;
+    }
+  } 
+  else if (currentTool instanceof Freehand) {
+    Freehand fh = (Freehand)currentTool;
+    fh.strokeColor = color(strokeR, strokeG, strokeB);
+    fh.strokeWeight = strokeWeightValue;
+  } 
+  else if (currentTool instanceof Eraser) {
+    ((Eraser)currentTool).strokeWeight = strokeWeightValue;
+  }
 }
 
 float numberInput(float x, float y, float value, float min, float max) {
