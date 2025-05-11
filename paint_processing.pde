@@ -389,9 +389,6 @@ void drawConfigPanel() {
         strokeG = numberInput(230, row1Y, strokeG, 0, 255);
         strokeB = numberInput(280, row1Y, strokeB, 0, 255);
     }
-    else if (currentTool instanceof Eraser) {
-        text("Eraser Size:", 20, row1Y);
-    }
 
     popStyle();
     updateToolProperties();
