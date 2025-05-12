@@ -26,7 +26,7 @@ abstract class Shape extends Tool {
         this.strokeWeight = strokeWeight;
     }
     
-    abstract void display(); // // Draws the shape on the canvas
+    abstract void display(); // Draws the shape on the canvas
 }
 
 /* 
@@ -122,7 +122,7 @@ class Triangle extends Shape {
             // We need to find the limits of the triangle in order to properly fill it
             int minY = min(y, min(y2, y3));
             int maxY = max(y, max(y2, y3));
-
+            
             // Scanline for filling the triangle
             for (int py = minY; py <= maxY; py++) {
                 ArrayList<Integer> intersections = new ArrayList<Integer>();
@@ -224,7 +224,7 @@ class Star extends Shape {
             int minY = (int)(y - outerRadius);
             int maxY = (int)(y + outerRadius);
 
-            // Scanline para preenchimento
+            // Scanline for filling the star
             for (int py = minY; py <= maxY; py++) {
                 ArrayList<Float> intersections = new ArrayList<Float>();
 
